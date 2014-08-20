@@ -42,7 +42,7 @@ namespace unistringxx
         /// Gets the version information.
         /// @returns A string representing the version information.
         ///
-        constexpr std::string str(void)
+        static inline const std::string str(void)
         {
             return (std::string(UNISTRINGXX_VERSION_STRING));
         }
@@ -78,10 +78,10 @@ namespace unistringxx
             );
         }
 
-        static const endian_mode PLATFORM_ENDIAN = get_endian_mode();
+        const endian_mode PLATFORM_ENDIAN = get_endian_mode();
 
         // table lookup for index matching. only used when transforming a 32-bit data to 24-bit data.
-        static const std::size_t _s_32bit_idx_lookup[4][3] =
+        const std::size_t _s_32bit_idx_lookup[4][3] =
         {
             { 0, 0, 0 }, // unknown endian
             { 0, 1, 2 }, // little endian
@@ -89,7 +89,7 @@ namespace unistringxx
             { 2, 3, 0 } // pdp endian
         };
 
-        static const std::size_t* _s_32bit_idx = _s_32bit_idx_lookup[PLATFORM_ENDIAN];
+        const std::size_t* _s_32bit_idx = _s_32bit_idx_lookup[PLATFORM_ENDIAN];
     } // namespace // ImplementationDetail
     /// @endinternal
 
@@ -292,7 +292,7 @@ namespace unistringxx
     /// @param value The value of the literal.
     /// @returns A uint24_t type based on the literal value.
     ///
-    uint24_t operator "" _u24(unsigned long long int value)
+    inline uint24_t operator "" _u24(unsigned long long int value)
     {
         return (uint24_t(static_cast<std::int_least32_t>(value)));
     }
@@ -302,7 +302,7 @@ namespace unistringxx
     /// @param value The value of the literal.
     /// @returns A uint24_t type based on the literal value.
     ///
-    uint24_t operator "" _U24(unsigned long long int value)
+    inline uint24_t operator "" _U24(unsigned long long int value)
     {
         return (uint24_t(static_cast<std::int_least32_t>(value)));
     }

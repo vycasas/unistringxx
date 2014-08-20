@@ -4,7 +4,6 @@
 
 #include <gtest/gtest.h>
 
-#include <unistringxx/common.hpp>
 #include <unistringxx/unichar.hpp>
 
 using namespace unistringxx;
@@ -164,7 +163,8 @@ TEST(unichar_test, literal_operators)
 {
     unichar_t uca;
 
-    uca = 'A'_uc;
+    //uca = 'A'_uc;
+    uca = USXX_CH('A'); // expands to 'A'_uc
     EXPECT_EQ(0x41, uca.code_point());
 
     uca = u'\u3042'_uc;

@@ -36,9 +36,11 @@ include_directories(
 
 set(
     UNISTRINGXX_HEADERS
+    ${CMAKE_BINARY_DIR}/config.h
     ${CMAKE_SOURCE_DIR}/include/unistringxx/common.hpp
     ${CMAKE_SOURCE_DIR}/include/unistringxx/unichar.hpp
     ${CMAKE_SOURCE_DIR}/include/unistringxx/unicore.hpp
+    ${CMAKE_SOURCE_DIR}/include/unistringxx/unistring.hpp
     ${CMAKE_SOURCE_DIR}/include/unistringxx/utils.hpp
 )
 
@@ -86,6 +88,11 @@ if (build_tests)
     add_test(unichar_test unichar_test)
     set(CHECK_DEPS ${CHECK_DEPS} unichar_test)
 
+    add_executable(unistring_test ${CMAKE_SOURCE_DIR}/test/unistring_test.cpp)
+    target_link_libraries(unistring_test ${GTEST_LIBS})
+    add_test(unistring_test unistring_test)
+    set(CHECK_DEPS ${CHECK_DEPS} unistring_test)
+
     add_custom_target(test_verbose COMMAND ${CMAKE_CTEST_COMMAND} -V DEPENDS ${CHECK_DEPS})
     add_custom_target(check DEPENDS test_verbose)
 
@@ -94,6 +101,7 @@ endif ()
 set(
     UNISTRINGXX_HEADERS_API
     ${CMAKE_SOURCE_DIR}/include/unistringxx/unichar
+    ${CMAKE_SOURCE_DIR}/include/unistringxx/unistring
 )
 
 install(

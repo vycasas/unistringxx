@@ -36,10 +36,9 @@ namespace unistringxx
 
         typedef std::int_least32_t int_type;
 
-        // using
         static const int_type invalid_value = std::numeric_limits<int_type>::max();
 
-        unichar(void) : _impl{0x00}
+        unichar(void) : unichar{0x00}
         { return; }
 
         // does not error check, validate with is_valid function
@@ -86,7 +85,6 @@ namespace unistringxx
 
                 value = (utf8_ch & (0xFF >> (0x07 - index))) << (((num_seq - 1) * 8) - ((num_seq - 1) * 2));
                 num_seq--;
-
 
                 bool is_valid = (num_seq == 0);
 
@@ -216,6 +214,11 @@ namespace unistringxx
             return (is_valid);
         }
 
+        bool is_null(void) const
+        {
+            return (this->code_point() == 0x00);
+        }
+
         operator bool(void) const
         {
             // returns whether the unicode is valid or not
@@ -320,28 +323,36 @@ namespace unistringxx
         bool operator>=(const unichar& other) const
         { return (!(this->code_point() < other.code_point())); }
 
+        static inline const unichar null_char(void)
+        { return (unichar{0x00}); }
+
         impl_type _impl;
-    }; // struct unicode
+    }; // struct unichar
 
     typedef unichar unichar_t;
 
     // Literal operators.
     // Overloaded in case future implementations/standard will force compilers to treat char16_t and char32_t as
     // native types like wchar_t.
-    unichar_t operator "" _uc(char ch)
+    inline unichar_t operator "" UNISTRINGXX_UNICHAR_LITERALOP(char ch)
     {
         return (unichar_t::from_utf8(ch));
     }
 
-    unichar_t operator "" _uc(char16_t ch16)
+    inline unichar_t operator "" UNISTRINGXX_UNICHAR_LITERALOP(char16_t ch16)
     {
         return (unichar_t::from_utf16(ch16));
     }
 
-    unichar_t operator "" _uc(char32_t ch32)
+    inline unichar_t operator "" UNISTRINGXX_UNICHAR_LITERALOP(char32_t ch32)
     {
         return (unichar_t::from_utf32(ch32));
     }
+
+    // Helper for using literal operators.
+    #define UNISTRINGXX_UNICHAR_LITERAL(ch) UNISTRINGXX_CONCAT(ch, UNISTRINGXX_UNICHAR_LITERALOP)
+    // Shorthand for above
+    #define USXX_CH(ch) UNISTRINGXX_UNICHAR_LITERAL(ch)
 
     struct unichar_traits
     {
@@ -375,13 +386,13 @@ namespace unistringxx
 
         static char_type* move(char_type* dest, const char_type* src, std::size_t count)
         {
-            std::copy(src, (src + count), dest);
+            std::copy_n(src, count, dest);
             return (dest);
         }
 
         static char_type* copy(char_type* dest, const char_type* src, std::size_t count)
         {
-            std::copy(src, (src + count), dest);
+            std::copy_n(src, count, dest);
             return (dest);
         }
 
@@ -399,8 +410,7 @@ namespace unistringxx
         static std::size_t length(const char_type* ch_str)
         {
             std::size_t itr = 0;
-            unichar null_char;
-            while (*(ch_str + itr) !=  null_char)
+            while (*(ch_str + itr) !=  unichar::null_char())
                 itr++;
             return (itr);
         }
