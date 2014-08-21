@@ -288,6 +288,50 @@ namespace unistringxx
 */
 
     ///
+    /// Prefix increment operator (e.g. ++ui24).
+    /// @param ui24 The uint24_t to increment.
+    /// @returns The incremented ui24.
+    ///
+    inline uint24_t& operator++(uint24_t& ui24)
+    {
+        return (ui24 += 1);
+    }
+
+    ///
+    /// Postfix increment operator (e.g. ui24++).
+    /// @param ui24 uint24_t to increment.
+    /// @returns The ui24 before getting incremented.
+    ///
+    inline uint24_t operator++(uint24_t& ui24, int)
+    {
+        uint24_t result(ui24);
+        ++ui24;
+        return (result);
+    }
+
+    ///
+    /// Prefix decrement operator (e.g. --ui24).
+    /// @param ui24 The uint24_t to decrement.
+    /// @returns The incremented ui24.
+    ///
+    inline uint24_t& operator--(uint24_t& ui24)
+    {
+        return (ui24 -= 1);
+    }
+
+    ///
+    /// Postfix decrement operator (e.g. ui24--).
+    /// @param ui24 uint24_t to decrement.
+    /// @returns The ui24 before getting decremented.
+    ///
+    inline uint24_t operator--(uint24_t& ui24, int)
+    {
+        uint24_t result(ui24);
+        --ui24;
+        return (result);
+    }
+
+    ///
     /// Literal operator for creating uint24_t type.
     /// @param value The value of the literal.
     /// @returns A uint24_t type based on the literal value.

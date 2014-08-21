@@ -55,10 +55,29 @@ TEST_F(uint24_t_test, int_conversion)
 
 TEST_F(uint24_t_test, basic_arithmethics)
 {
+    uint24_t ui24a = 0x112233_u24;
+    uint24_t ui24b = 0x112233_u24;
+    EXPECT_EQ(0x00224466, static_cast<int_least32_t>(ui24a + ui24b));
+    EXPECT_EQ(0x00, static_cast<int_least32_t>(ui24a - ui24b));
+    EXPECT_EQ(0x00224466, static_cast<int_least32_t>(ui24a * 2));
+    EXPECT_EQ(1, static_cast<int_least32_t>(ui24a / ui24b));
     return;
 }
 
 TEST_F(uint24_t_test, assignments)
 {
+    uint24_t ui24a = 0x112233_u24;
+    ui24a += 0x112233_u24;
+    EXPECT_EQ(0x00224466, static_cast<int_least32_t>(ui24a));
+    ui24a -= 0x112233_u24;
+    EXPECT_EQ(0x00112233, static_cast<int_least32_t>(ui24a));
+
+    EXPECT_EQ(0x00112234, static_cast<int_least32_t>(++ui24a));
+    EXPECT_EQ(0x00112234, static_cast<int_least32_t>(ui24a++));
+    EXPECT_EQ(0x00112235, static_cast<int_least32_t>(ui24a));
+    EXPECT_EQ(0x00112234, static_cast<int_least32_t>(--ui24a));
+    EXPECT_EQ(0x00112234, static_cast<int_least32_t>(ui24a--));
+    EXPECT_EQ(0x00112233, static_cast<int_least32_t>(ui24a));
+
     return;
 }
