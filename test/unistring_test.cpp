@@ -713,5 +713,66 @@ TEST(unistring_test, conversions)
     ASSERT_EQ('B'_uc, ustr_c[2]);
     ASSERT_EQ(U'\U0010FFFF'_uc, ustr_c[3]);
 
+    ustr_a = unistring{{ '8', '8', 'C', 'C' }};
+
+    int i_expected = 88;
+    std::size_t s_end_index = unistring::npos;
+    int i_result = unistringxx::stoi(ustr_a, &s_end_index, 10);
+    ASSERT_EQ(static_cast<std::size_t>(2), s_end_index);
+    ASSERT_EQ(i_expected, i_result);
+
+    i_expected = 0x88CC;
+    s_end_index = unistring::npos;
+    i_result = unistringxx::stoi(ustr_a, &s_end_index, 16);
+    ASSERT_EQ(static_cast<std::size_t>(4), s_end_index);
+    ASSERT_EQ(i_expected, i_result);
+
+    unsigned long long ull_expected = 88;
+    s_end_index = unistring::npos;
+    unsigned long long ull_result = unistringxx::stoull(ustr_a, &s_end_index, 10);
+    ASSERT_EQ(static_cast<std::size_t>(2), s_end_index);
+    ASSERT_EQ(i_expected, i_result);
+
+    ull_expected = 0x88CC;
+    s_end_index = unistring::npos;
+    ull_result = unistringxx::stoull(ustr_a, &s_end_index, 16);
+    ASSERT_EQ(static_cast<std::size_t>(4), s_end_index);
+    ASSERT_EQ(ull_expected, ull_result);
+
+    ustr_a = unistring{{ '8', '8' }};
+    ustr_b = unistringxx::to_unistring(88);
+    ASSERT_EQ(ustr_a, ustr_b);
+
     return;
 }
+
+TEST(unistring_test, literal_operators)
+{
+    const unistring ustr_a{{ 'A', 'B', u'\u3042', U'\U0010FFFF' }};
+    unistring ustr_b;
+
+    ustr_b = u8"AB\u3042\U0010FFFF"_us;
+    ASSERT_EQ(ustr_a, ustr_b);
+
+    ustr_b = u"AB\u3042\U0010FFFF"_us;
+    ASSERT_EQ(ustr_a, ustr_b);
+
+    ustr_b = U"AB\u3042\U0010FFFF"_us;
+    ASSERT_EQ(ustr_a, ustr_b);
+
+    return;
+}
+
+TEST(unistring_test, hashing)
+{
+    std::string str("ABCDEFGH");
+    unistring ustr_a = unistring::from_u8string(str);
+    std::hash<std::string> str_hash_function;
+    std::hash<unistring> ustr_hash_function;
+    const std::size_t
+        result_a = str_hash_function(str),
+        result_b = ustr_hash_function(ustr_a);
+    ASSERT_EQ(result_a, result_b);
+    return;
+}
+

@@ -1250,13 +1250,97 @@ namespace unistringxx
     // Shorthand for above
     #define USXX_STR(str) UNISTRINGXX_UNISTRING_LITERAL(str)
 
+    template<typename allocatorT>
+    inline int stoi(const generic_unistring<allocatorT>& str, std::size_t* index = nullptr, int base = 10)
+    { return (std::stoi(str.to_u8string(), index, base)); }
+
+    template<typename allocatorT>
+    inline long stol(const generic_unistring<allocatorT>& str, std::size_t* index = nullptr, int base = 10)
+    { return (std::stol(str.to_u8string(), index, base)); }
+
+    template<typename allocatorT>
+    inline long long stoll(const generic_unistring<allocatorT>& str, std::size_t* index = nullptr, int base = 10)
+    { return (std::stoll(str.to_u8string(), index, base)); }
+
+    template<typename allocatorT>
+    inline unsigned long stoul(const generic_unistring<allocatorT>& str, std::size_t* index = nullptr, int base = 10)
+    { return (std::stoul(str.to_u8string(), index, base)); }
+
+    template<typename allocatorT>
+    inline unsigned long long stoull(
+        const generic_unistring<allocatorT>& str, std::size_t* index = nullptr, int base = 10
+    )
+    { return (std::stoull(str.to_u8string(), index, base)); }
+
+    template<typename allocatorT>
+    inline float stof(const generic_unistring<allocatorT>& str, std::size_t* index = nullptr)
+    { return (std::stof(str.to_u8string(), index)); }
+
+    template<typename allocatorT>
+    inline double stod(const generic_unistring<allocatorT>& str, std::size_t* index = nullptr)
+    { return (std::stod(str.to_u8string(), index)); }
+
+    template<typename allocatorT>
+    inline long double stold(const generic_unistring<allocatorT>& str, std::size_t* index = nullptr)
+    { return (std::stold(str.to_u8string(), index)); }
+
+    namespace
+    {
+        template<typename T>
+        inline unistring to_unistring_internal(T value)
+        { return (unistring::from_u8string(std::to_string(value))); }
+    }
+
+    inline unistring to_unistring(int value)
+    { return (to_unistring_internal(value)); }
+
+    inline unistring to_unistring(long value)
+    { return (to_unistring_internal(value)); }
+
+    inline unistring to_unistring(long long value)
+    { return (to_unistring_internal(value)); }
+
+    inline unistring to_unistring(unsigned int value)
+    { return (to_unistring_internal(value)); }
+
+    inline unistring to_unistring(unsigned long value)
+    { return (to_unistring_internal(value)); }
+
+    inline unistring to_unistring(unsigned long long value)
+    { return (to_unistring_internal(value)); }
+
+    inline unistring to_unistring(float value)
+    { return (to_unistring_internal(value)); }
+
+    inline unistring to_unistring(double value)
+    { return (to_unistring_internal(value)); }
+
+    inline unistring to_unistring(long double value)
+    { return (to_unistring_internal(value)); }
+
+
 } // namespace unistringxx
 
 namespace std
 {
+    // specialization of std::hash
+    template <>
+    struct hash<unistringxx::unistring>
+    {
+        typedef std::size_t result_type;
+        result_type operator()(const unistringxx::unistring& key) const
+        {
+            std::hash<std::string> hash_function;
+            return (hash_function(key.to_u8string()));
+        }
+    };
+
     // specialization of std::swap
     template<typename allocatorT>
-    void swap(unistringxx::generic_unistring<allocatorT>& left, unistringxx::generic_unistring<allocatorT>& right)
+    inline void swap(
+        unistringxx::generic_unistring<allocatorT>& left,
+        unistringxx::generic_unistring<allocatorT>& right
+    )
     {
         left.swap(right);
         return;
