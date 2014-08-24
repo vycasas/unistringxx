@@ -1,6 +1,6 @@
 /// @file
-#if !defined(UNISTRINGXX_UNICHAR_HPP)
-#define UNISTRINGXX_UNICHAR_HPP
+#if !defined(UNISTRINGXX_UCHAR_HPP)
+#define UNISTRINGXX_UCHAR_HPP
 
 #include <cstdint>
 #include <ios>
@@ -11,7 +11,7 @@
 #include <vector>
 
 #include "common.hpp"
-#include "unicore.hpp"
+#include "core.hpp"
 #include "utils.hpp"
 
 namespace unistringxx
@@ -22,10 +22,10 @@ namespace unistringxx
     ///
     /// Represents a single Unicode code point. This type does not tie itself to any Unicode encoding. Each instance of
     /// this type is supposed to be an actual Unicode code point (valid or not). When using outside this file
-    /// definition, the type must be referred to as "unichar_t" to ensure implementation compatibility in future
+    /// definition, the type must be referred to as "uchar_t" to ensure implementation compatibility in future
     /// releases.
     ///
-    struct unichar
+    struct uchar
     {
 #if !(UNISTRINGXX_TEST)
         typedef uint24_t impl_type;
@@ -38,19 +38,19 @@ namespace unistringxx
 
         static const int_type invalid_value = std::numeric_limits<int_type>::max();
 
-        unichar(void) : unichar{0x00}
+        uchar(void) : uchar{0x00}
         { return; }
 
         // does not error check, validate with is_valid function
-        unichar(int_type value) : _impl{static_cast<impl_type>(value)}
+        uchar(int_type value) : _impl{static_cast<impl_type>(value)}
         { return; }
 
-        static unichar from_utf8(
+        static uchar from_utf8(
             char8_t utf8_ch, char8_t utf8_ch1 = '\0', char8_t utf8_ch2 = '\0', char8_t utf8_ch3 = '\0'
         ) UNISTRINGXX_MAY_THROW_EXCEPTIONS
         {
             std::size_t index = 0x07;
-            int_type value = unichar::invalid_value;
+            int_type value = uchar::invalid_value;
 
             if (!is_bit_set(utf8_ch, index)) {
                 // ASCII
@@ -71,7 +71,7 @@ namespace unistringxx
 #if (UNISTRINGXX_WITH_EXCEPTIONS)
                     UNISTRINGXX_THROW(std::range_error, "Invalid head sequence found while decoding UTF-8.");
 #else // (UNISTRINGXX_WITH_EXCEPTIONS)
-                    _impl = impl_type{unichar::invalid_value};
+                    _impl = impl_type{uchar::invalid_value};
                     return;
 #endif // (UNISTRINGXX_WITH_EXCEPTIONS)
                 }
@@ -139,17 +139,17 @@ namespace unistringxx
 #if (UNISTRINGXX_WITH_EXCEPTIONS)
                     UNISTRINGXX_THROW(std::range_error, "Invalid octets detected while decoding UTF-8.");
 #else // (UNISTRINGXX_WITH_EXCEPTIONS)
-                    value = unichar::invalid_value;
+                    value = uchar::invalid_value;
 #endif // (UNISTRINGXX_WITH_EXCEPTIONS)
                 }
             }
 
-            return (unichar{value});
+            return (uchar{value});
         }
 
-        static unichar from_utf16(char16_t utf16_ch, char16_t utf16_ls = u'\0') UNISTRINGXX_MAY_THROW_EXCEPTIONS
+        static uchar from_utf16(char16_t utf16_ch, char16_t utf16_ls = u'\0') UNISTRINGXX_MAY_THROW_EXCEPTIONS
         {
-            int_type value = unichar::invalid_value;
+            int_type value = uchar::invalid_value;
 
             if (utf16_ch < 0xD800 || utf16_ch > 0xDFFF) {
                 value = utf16_ch;
@@ -166,20 +166,20 @@ namespace unistringxx
 #if (UNISTRINGXX_WITH_EXCEPTIONS)
                     UNISTRINGXX_THROW(std::range_error, "Invalid surrogate pairs.");
 #else // (UNISTRINGXX_WITH_EXCEPTIONS)
-                    value = unichar::invalid_value;
+                    value = uchar::invalid_value;
 #endif // (UNISTRINGXX_WITH_EXCEPTIONS)
                 }
             }
 
-            return (unichar{value});
+            return (uchar{value});
         }
 
-        static unichar from_utf32(char32_t utf32_ch) UNISTRINGXX_MAY_THROW_EXCEPTIONS
+        static uchar from_utf32(char32_t utf32_ch) UNISTRINGXX_MAY_THROW_EXCEPTIONS
         {
             bool is_valid = true;
             int_type value = static_cast<int_type>(utf32_ch);
 
-            if (value != unichar::invalid_value) {
+            if (value != uchar::invalid_value) {
                 // Make sure value is not within UTF-16 surrogates (as per RFC 3629).
                 is_valid = !((value >= 0xD800) && (value <= 0xDFFF));
 
@@ -191,16 +191,16 @@ namespace unistringxx
 #if (UNISTRINGXX_WITH_EXCEPTIONS)
                 UNISTRINGXX_THROW(std::range_error, "Invalid Unicode code points detected while decoding UTF-32.");
 #else // (UNISTRINGXX_WITH_EXCEPTIONS)
-                value = unichar::invalid_value;
+                value = uchar::invalid_value;
 #endif // (UNISTRINGXX_WITH_EXCEPTIONS)
             }
 
-            return (unichar{value});
+            return (uchar{value});
         }
 
         bool is_valid(void) const
         {
-            bool is_valid = this->code_point() != unichar::invalid_value;
+            bool is_valid = this->code_point() != uchar::invalid_value;
             if (is_valid) {
                 // Further validation of correct code points.
                 int_type value = this->code_point();
@@ -303,60 +303,59 @@ namespace unistringxx
             return (static_cast<char32_t>(this->code_point()));
         }
 
-        // unichar should not be treated like native types where implicit casting can happen, thus these overload
+        // uchar should not be treated like native types where implicit casting can happen, thus these overload
         // operators must be explicitly defined
-        bool operator==(const unichar& other) const
+        bool operator==(const uchar& other) const
         { return (this->code_point() == other.code_point()); }
 
-        bool operator!=(const unichar& other) const
+        bool operator!=(const uchar& other) const
         { return (!this->operator==(other)); }
 
-        bool operator<(const unichar& other) const
+        bool operator<(const uchar& other) const
         { return (this->code_point() < other.code_point()); }
 
-        bool operator>(const unichar& other) const
+        bool operator>(const uchar& other) const
         { return (this->code_point() > other.code_point()); }
 
-        bool operator<=(const unichar& other) const
+        bool operator<=(const uchar& other) const
         { return (!(this->code_point() > other.code_point())); }
 
-        bool operator>=(const unichar& other) const
+        bool operator>=(const uchar& other) const
         { return (!(this->code_point() < other.code_point())); }
 
-        static inline const unichar null_char(void)
-        { return (unichar{0x00}); }
+        static inline const uchar null_char(void)
+        { return (uchar{0x00}); }
 
         impl_type _impl;
-    }; // struct unichar
+    }; // struct uchar
 
-    typedef unichar unichar_t;
+    typedef uchar uchar_t;
 
-    // Literal operators.
-    // Overloaded in case future implementations/standard will force compilers to treat char16_t and char32_t as
-    // native types like wchar_t.
-    inline unichar_t operator "" UNISTRINGXX_UNICHAR_LITERALOP(char ch)
+
+    ///
+    /// Literal operators provided by unistringxx.
+    ///
+    namespace operators
     {
-        return (unichar_t::from_utf8(ch));
+        inline uchar_t operator "" _uc(char ch)
+        {
+            return (uchar_t::from_utf8(ch));
+        }
+
+        inline uchar_t operator "" _uc(char16_t ch16)
+        {
+            return (uchar_t::from_utf16(ch16));
+        }
+
+        inline uchar_t operator "" _uc(char32_t ch32)
+        {
+            return (uchar_t::from_utf32(ch32));
+        }
     }
 
-    inline unichar_t operator "" UNISTRINGXX_UNICHAR_LITERALOP(char16_t ch16)
+    struct uchar_traits
     {
-        return (unichar_t::from_utf16(ch16));
-    }
-
-    inline unichar_t operator "" UNISTRINGXX_UNICHAR_LITERALOP(char32_t ch32)
-    {
-        return (unichar_t::from_utf32(ch32));
-    }
-
-    // Helper for using literal operators.
-    #define UNISTRINGXX_UNICHAR_LITERAL(ch) UNISTRINGXX_CONCAT(ch, UNISTRINGXX_UNICHAR_LITERALOP)
-    // Shorthand for above
-    #define USXX_CH(ch) UNISTRINGXX_UNICHAR_LITERAL(ch)
-
-    struct unichar_traits
-    {
-        typedef unichar_t char_type;
+        typedef uchar_t char_type;
         typedef char_type::int_type int_type;
         typedef std::streamoff off_type;
         typedef std::streampos pos_type;
@@ -410,7 +409,7 @@ namespace unistringxx
         static std::size_t length(const char_type* ch_str)
         {
             std::size_t itr = 0;
-            while (*(ch_str + itr) !=  unichar::null_char())
+            while (*(ch_str + itr) !=  uchar::null_char())
                 itr++;
             return (itr);
         }
@@ -449,12 +448,12 @@ namespace unistringxx
         {
             // if value != eof, then return value
             // if value == eof, then return 0 (can't return eof because it will be equivalent to the previous predicate)
-            return (value != unichar_traits::eof() ? value : 0);
+            return (value != uchar_traits::eof() ? value : 0);
         }
-    }; // struct unichar_traits
+    }; // struct uchar_traits
 
-    typedef unichar_traits unichar_t_traits;
+    typedef uchar_traits uchar_t_traits;
 
 } // namespace unistringxx
 
-#endif // !defined(UNISTRINGXX_UNICHAR_HPP)
+#endif // !defined(UNISTRINGXX_UCHAR_HPP)

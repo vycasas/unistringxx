@@ -8,15 +8,8 @@
 #include <memory>
 #include <vector>
 
-#include "unichar.hpp"
+#include "uchar.hpp"
 #include "utils.hpp"
-
-#if !(UNISTRINGXX_TEST)
-#error Remove these headers
-#else
-#include <iomanip>
-#include <iostream>
-#endif
 
 namespace unistringxx
 {
@@ -31,14 +24,14 @@ namespace unistringxx
     // iterator version or not). Constructors are exempted from this requirement. Some functions may also be exempt from
     // this requirement if it makes sense.
     template<typename allocatorT>
-    class generic_unistring
+    class generic_ustring
     {
     public:
         // I decided not to use std::deque because in some implementations (e.g. clang/libc++) it pre-allocates 4096
         // objects upon creation. std::vector has much more acceptable default allocation techniques.
-        typedef std::vector<unichar_t_traits::char_type, allocatorT> impl_type;
+        typedef std::vector<uchar_t_traits::char_type, allocatorT> impl_type;
 
-        typedef unichar_t_traits traits_type;
+        typedef uchar_t_traits traits_type;
         typedef typename traits_type::char_type char_type;
         typedef typename impl_type::value_type value_type;
         static_assert(sizeof (char_type) == sizeof (value_type), "char_type is not equal to value_type.");
@@ -58,34 +51,34 @@ namespace unistringxx
 
         static constexpr size_type npos = std::numeric_limits<size_type>::max();
 
-        generic_unistring(void) :
-            generic_unistring{allocatorT()}
+        generic_ustring(void) :
+            generic_ustring{allocatorT()}
         { return; }
 
-        explicit generic_unistring(const allocator_type& alloc) :
-            generic_unistring{0, char_type::null_char(), alloc}
+        explicit generic_ustring(const allocator_type& alloc) :
+            generic_ustring{0, char_type::null_char(), alloc}
         { return; }
 
-        generic_unistring(const generic_unistring& other) noexcept :
-            generic_unistring{other, other.get_allocator()}
+        generic_ustring(const generic_ustring& other) noexcept :
+            generic_ustring{other, other.get_allocator()}
         { return; }
 
-        generic_unistring(const generic_unistring& other, const allocator_type& alloc) :
+        generic_ustring(const generic_ustring& other, const allocator_type& alloc) :
             _impl{other._impl, alloc}
         { return; }
 
-        generic_unistring(generic_unistring&& other) noexcept :
-            generic_unistring{other, other.get_allocator()}
+        generic_ustring(generic_ustring&& other) noexcept :
+            generic_ustring{other, other.get_allocator()}
         { return; }
 
-        generic_unistring(generic_unistring&& other, const allocator_type& alloc) :
+        generic_ustring(generic_ustring&& other, const allocator_type& alloc) :
             _impl{other._impl, alloc}
         { return; }
 
-        generic_unistring(
-            const generic_unistring& other,
+        generic_ustring(
+            const generic_ustring& other,
             size_type index,
-            size_type count = generic_unistring::npos,
+            size_type count = generic_ustring::npos,
             const allocator_type& alloc = allocator_type()
         )
         {
@@ -106,7 +99,7 @@ namespace unistringxx
             return;
         }
 
-        generic_unistring(const char_type* cstr, size_type count, const allocator_type& alloc = allocator_type())
+        generic_ustring(const char_type* cstr, size_type count, const allocator_type& alloc = allocator_type())
         {
             if (count > _impl.max_size()) {
 #if (UNISTRINGXX_WITH_EXCEPTIONS)
@@ -124,11 +117,11 @@ namespace unistringxx
             return;
         }
 
-        generic_unistring(const char_type* cstr, const allocator_type& alloc = allocator_type()) :
-            generic_unistring{cstr, traits_type::length(cstr), alloc}
+        generic_ustring(const char_type* cstr, const allocator_type& alloc = allocator_type()) :
+            generic_ustring{cstr, traits_type::length(cstr), alloc}
         { return; }
 
-        generic_unistring(size_type count, char_type ch, const allocator_type& alloc = allocator_type()) :
+        generic_ustring(size_type count, char_type ch, const allocator_type& alloc = allocator_type()) :
             _impl{(count + 1), ch, alloc}
         {
             if (ch != char_type::null_char())
@@ -137,7 +130,7 @@ namespace unistringxx
         }
 
         template<typename inputIterT>
-        generic_unistring(inputIterT first, inputIterT last, const allocator_type& alloc = allocator_type()) :
+        generic_ustring(inputIterT first, inputIterT last, const allocator_type& alloc = allocator_type()) :
             _impl{first, last, alloc}
         {
             _impl.push_back(char_type::null_char());
@@ -145,7 +138,7 @@ namespace unistringxx
             return;
         }
 
-        generic_unistring(std::initializer_list<char_type> init_list, const allocator_type& alloc = allocator_type()) :
+        generic_ustring(std::initializer_list<char_type> init_list, const allocator_type& alloc = allocator_type()) :
             _impl{init_list, alloc}
         { 
             _impl.push_back(char_type::null_char());
@@ -153,7 +146,7 @@ namespace unistringxx
             return;
         }
 
-        ~generic_unistring(void) = default;
+        ~generic_ustring(void) = default;
 
         // UNISTRINGXX_UNISTRING_BASIC_PROPERTIES
 
@@ -166,12 +159,12 @@ namespace unistringxx
         const_pointer c_str(void) const noexcept
         { return (this->data()); }
 
-        generic_unistring substr(size_type index = 0, size_type count = npos) const
-        { return (generic_unistring{*this, index, count, this->get_allocator()}); }
+        generic_ustring substr(size_type index = 0, size_type count = npos) const
+        { return (generic_ustring{*this, index, count, this->get_allocator()}); }
 
         // UNISTRINGXX_UNISTRING_COMPARE
 
-        int compare(const generic_unistring& str) const noexcept
+        int compare(const generic_ustring& str) const noexcept
         {
             const size_type compare_count = std::min(this->size(), str.size());
             // Note: The compare_count + 1 is done so that we compare the null characters. This provides the
@@ -179,31 +172,31 @@ namespace unistringxx
             return (traits_type::compare(this->c_str(), str.c_str(), compare_count + 1));
         }
 
-        int compare(size_type index, size_type count, const generic_unistring& str) const
+        int compare(size_type index, size_type count, const generic_ustring& str) const
         { return (this->substr(index, count).compare(str)); }
 
         int compare(
             size_type index1, size_type count1,
-            const generic_unistring& str, size_type index2, size_type count2 = npos
+            const generic_ustring& str, size_type index2, size_type count2 = npos
         ) const
         { return (this->substr(index1, count1).compare(str.substr(index2, count2))); }
 
         int compare(const char_type* cstr) const noexcept
-        { return (this->compare(generic_unistring{cstr})); }
+        { return (this->compare(generic_ustring{cstr})); }
 
         int compare(size_type index, size_type count, const char_type* cstr) const
         { return (this->substr(index, count).compare(cstr)); }
 
         int compare(size_type index, size_type count, const char_type* cstr, size_type cstr_count) const
-        { return (this->substr(index, count).compare(generic_unistring{cstr, cstr_count})); }
+        { return (this->substr(index, count).compare(generic_ustring{cstr, cstr_count})); }
 
         // UNISTRINGXX_UNISTRING_ASSIGNMENT_OPERATIONS
 
-        generic_unistring& operator=(const generic_unistring& str) = default;
+        generic_ustring& operator=(const generic_ustring& str) = default;
 
-        generic_unistring& operator=(generic_unistring&& str) /*noexcept*/ = default;
+        generic_ustring& operator=(generic_ustring&& str) /*noexcept*/ = default;
 
-        generic_unistring& operator=(const char_type* cstr)
+        generic_ustring& operator=(const char_type* cstr)
         {
             // Note:
             // I have profiled this code vs. the following version:
@@ -211,68 +204,68 @@ namespace unistringxx
             //      _impl.insert(...); // assuming arguments are calculated from cstr (or other).
             // and using std::move like below invokes 2000 instruction reads less than above.
             // memory wise, there are no difference. - Vincent
-            // calls generic_unistring::operator=(generic_unistring&&)
-            return ((*this) = std::move(generic_unistring{cstr, this->get_allocator()}));
+            // calls generic_ustring::operator=(generic_ustring&&)
+            return ((*this) = std::move(generic_ustring{cstr, this->get_allocator()}));
         }
 
-        generic_unistring& operator=(char_type ch)
+        generic_ustring& operator=(char_type ch)
         {
-            // calls generic_unistring::operator=(generic_unistring&&)
-            return ((*this) = std::move(generic_unistring{1, ch, this->get_allocator()}));
+            // calls generic_ustring::operator=(generic_ustring&&)
+            return ((*this) = std::move(generic_ustring{1, ch, this->get_allocator()}));
         }
 
-        generic_unistring& operator=(std::initializer_list<char_type> init_list)
+        generic_ustring& operator=(std::initializer_list<char_type> init_list)
         {
-            // calls generic_unistring::operator=(generic_unistring&&)
-            return ((*this) = std::move(generic_unistring{init_list, this->get_allocator()}));
+            // calls generic_ustring::operator=(generic_ustring&&)
+            return ((*this) = std::move(generic_ustring{init_list, this->get_allocator()}));
         }
 
-        generic_unistring& assign(const generic_unistring& str)
+        generic_ustring& assign(const generic_ustring& str)
         {
-            // calls generic_unistring::operator=(generic_unistring&)
+            // calls generic_ustring::operator=(generic_ustring&)
             return ((*this) = str);
         }
 
-        generic_unistring& assign(generic_unistring&& str)
+        generic_ustring& assign(generic_ustring&& str)
         {
-            // calls generic_unistring::operator=(generic_unistring&&)
+            // calls generic_ustring::operator=(generic_ustring&&)
             return ((*this) = std::move(str));
         }
 
-        generic_unistring& assign(const generic_unistring& str, size_type index, size_type count = npos)
+        generic_ustring& assign(const generic_ustring& str, size_type index, size_type count = npos)
         {
-            // calls generic_unistring::assign(const generic_unistring&)
+            // calls generic_ustring::assign(const generic_ustring&)
             return (this->assign(str.substr(index, count)));
         }
 
-        generic_unistring& assign(const char_type* cstr, size_type count)
+        generic_ustring& assign(const char_type* cstr, size_type count)
         {
-            // calls generic_unistring::assign(const generic_unistring&)
-            return (this->assign(generic_unistring{cstr, count, this->get_allocator()}));
+            // calls generic_ustring::assign(const generic_ustring&)
+            return (this->assign(generic_ustring{cstr, count, this->get_allocator()}));
         }
 
-        generic_unistring& assign(const char_type* cstr)
+        generic_ustring& assign(const char_type* cstr)
         {
-            // calls generic_unistring::assign(const char_type*, size_type)
+            // calls generic_ustring::assign(const char_type*, size_type)
             return (this->assign(cstr, traits_type::length(cstr)));
         }
 
-        generic_unistring& assign(size_type count, char_type ch)
+        generic_ustring& assign(size_type count, char_type ch)
         {
-            // calls generic_unistring::assign(const generic_unistring&)
-            return (this->assign(generic_unistring{count, ch, this->get_allocator()}));
+            // calls generic_ustring::assign(const generic_ustring&)
+            return (this->assign(generic_ustring{count, ch, this->get_allocator()}));
         }
 
         template<typename inputIterT>
-        generic_unistring& assign(inputIterT first, inputIterT last)
+        generic_ustring& assign(inputIterT first, inputIterT last)
         {
-            // calls generic_unistring::assign(const generic_unistring&)
-            return (this->assign(generic_unistring{first, last}));
+            // calls generic_ustring::assign(const generic_ustring&)
+            return (this->assign(generic_ustring{first, last}));
         }
 
-        generic_unistring& assign(std::initializer_list<char_type> init_list)
+        generic_ustring& assign(std::initializer_list<char_type> init_list)
         {
-            // calls generic_unistring::assign(inputIterT, inputIterT)
+            // calls generic_ustring::assign(inputIterT, inputIterT)
             return (this->assign(init_list.begin(), init_list.end()));
         }
 
@@ -343,8 +336,8 @@ namespace unistringxx
             }
 
             if (count < this->size()) {
-                // calls generic_unistring::operator=(generic_unistring&&)
-                (*this) = std::move(generic_unistring{*this, 0, count, this->get_allocator()});
+                // calls generic_ustring::operator=(generic_ustring&&)
+                (*this) = std::move(generic_ustring{*this, 0, count, this->get_allocator()});
             }
             else {
                 // Note: null character is at the end of _impl. "this->cend()" returns the pos of this
@@ -447,63 +440,63 @@ namespace unistringxx
 
         // UNISTRINGXX_UNISTRING_INSERTIONS
 
-        generic_unistring& insert(size_type index, const generic_unistring& str)
+        generic_ustring& insert(size_type index, const generic_ustring& str)
         {
 #if (UNISTRINGXX_WITH_EXCEPTIONS)
             if (index > this->size())
                 UNISTRINGXX_THROW(std::out_of_range, "The 'index' argument is out of range.");
 #endif // (UNISTRINGXX_WITH_EXCEPTIONS)
 
-            // calls generic_unistring::insert(const_iterator, inputIterT, inputIterT)
+            // calls generic_ustring::insert(const_iterator, inputIterT, inputIterT)
             this->insert(this->cbegin() + index, str.cbegin(), str.cend());
             return (*this);
         }
 
-        generic_unistring& insert(
+        generic_ustring& insert(
             size_type index,
-            const generic_unistring& str,
+            const generic_ustring& str,
             size_type str_index,
             size_type str_count = npos
         )
         {
-            // calls generic_unistring::insert(size_type, const generic_unistring&)
+            // calls generic_ustring::insert(size_type, const generic_ustring&)
             return (this->insert(index, str.substr(str_index, str_count)));
         }
 
-        generic_unistring& insert(size_type index, const char_type* cstr, size_type count)
+        generic_ustring& insert(size_type index, const char_type* cstr, size_type count)
         {
 #if (UNISTRINGXX_WITH_EXCEPTIONS)
             if ((this->size() + count) > this->max_size())
                 UNISTRINGXX_THROW(std::length_error, "The 'count' argument would have exceeded max_size().");
 #endif // (UNISTRINGXX_WITH_EXCEPTIONS)
 
-            // calls generic_unistring::insert(const generic_unistring&)
-            this->insert(index, generic_unistring{cstr, count, this->get_allocator()});
+            // calls generic_ustring::insert(const generic_ustring&)
+            this->insert(index, generic_ustring{cstr, count, this->get_allocator()});
             return (*this);
         }
 
-        generic_unistring& insert(size_type index, const char_type* cstr)
+        generic_ustring& insert(size_type index, const char_type* cstr)
         {
-            // calls generic_unistring::insert(size_type, const char_type*, size_type)
+            // calls generic_ustring::insert(size_type, const char_type*, size_type)
             return (this->insert(index, cstr, traits_type::length(cstr)));
         }
 
-        generic_unistring& insert(size_type index, size_type count, char_type ch)
+        generic_ustring& insert(size_type index, size_type count, char_type ch)
         {
-            // calls generic_unistring::insert(size_type, const generic_unistring&)
-            return (this->insert(index, generic_unistring{count, ch, this->get_allocator()}));
+            // calls generic_ustring::insert(size_type, const generic_ustring&)
+            return (this->insert(index, generic_ustring{count, ch, this->get_allocator()}));
         }
 
         iterator insert(const_iterator pos, char_type ch)
         {
-            // calls generic_unistring::insert(const_iterator, size_type, char_type)
+            // calls generic_ustring::insert(const_iterator, size_type, char_type)
             return (this->insert(pos, 1, ch));
         }
 
         iterator insert(const_iterator pos, size_type count, char_type ch)
         {
-            generic_unistring ustr{count, ch, this->get_allocator()};
-            // calls generic_unistring::insert(const_iterator, inputIterT, inputIterT)
+            generic_ustring ustr{count, ch, this->get_allocator()};
+            // calls generic_ustring::insert(const_iterator, inputIterT, inputIterT)
             return (this->insert(pos, ustr.cbegin(), ustr.cend()));
         }
 
@@ -517,96 +510,96 @@ namespace unistringxx
 
         iterator insert(const_iterator pos, std::initializer_list<char_type> init_list)
         {
-            // calls generic_unistring::insert(const_iterator, inputIterT, inputIterT)
+            // calls generic_ustring::insert(const_iterator, inputIterT, inputIterT)
             return (this->insert(pos, init_list.begin(), init_list.end()));
         }
 
         // UNISTRINGXX_UNISTRING_APPENDING
 
-        generic_unistring& operator+=(const generic_unistring& str)
+        generic_ustring& operator+=(const generic_ustring& str)
         {
-            // calls generic_unistring::append(const generic_unistring&)
+            // calls generic_ustring::append(const generic_ustring&)
             return (this->append(str));
         }
 
-        generic_unistring& operator+=(const char_type* cstr)
+        generic_ustring& operator+=(const char_type* cstr)
         {
-            // calls generic_unistring::append(const char_type*)
+            // calls generic_ustring::append(const char_type*)
             return (this->append(cstr));
         }
 
-        generic_unistring& operator+=(char_type ch)
+        generic_ustring& operator+=(char_type ch)
         {
             this->push_back(ch);
             return (*this);
         }
 
-        generic_unistring& operator+=(std::initializer_list<char_type> init_list)
+        generic_ustring& operator+=(std::initializer_list<char_type> init_list)
         {
-            // calls generic_unistring::append(std::initializer_list<char_type>)
+            // calls generic_ustring::append(std::initializer_list<char_type>)
             return (this->append(init_list));
         }
 
-        generic_unistring& append(const generic_unistring& str)
+        generic_ustring& append(const generic_ustring& str)
         {
-            // calls generic_unistring::append(inputIterT, inputIterT)
+            // calls generic_ustring::append(inputIterT, inputIterT)
             return (this->append(str.cbegin(), str.cend()));
         }
 
-        generic_unistring& append(const generic_unistring& str, size_type index, size_type count = npos)
+        generic_ustring& append(const generic_ustring& str, size_type index, size_type count = npos)
         {
-            // calls generic_unistring::append(const generic_unistring&)
+            // calls generic_ustring::append(const generic_ustring&)
             return (this->append(str.substr(index, count)));
         }
 
-        generic_unistring& append(const char_type* cstr, size_type count)
+        generic_ustring& append(const char_type* cstr, size_type count)
         {
 #if (UNISTRINGXX_WITH_EXCEPTIONS)
             if ((this->size() + count) > this->max_size())
                 UNISTRINGXX_THROW(std::length_error, "The 'count' argument would have exceeded max_size().");
 #endif // (UNISTRINGXX_WITH_EXCEPTIONS)
 
-            // calls generic_unistring::append(const generic_unistring&)
-            return (this->append(generic_unistring{cstr, count, this->get_allocator()}));
+            // calls generic_ustring::append(const generic_ustring&)
+            return (this->append(generic_ustring{cstr, count, this->get_allocator()}));
         }
 
-        generic_unistring& append(const char_type* cstr)
+        generic_ustring& append(const char_type* cstr)
         {
-            // calls generic_unistring::append(const char_type*, size_type)
+            // calls generic_ustring::append(const char_type*, size_type)
             return (this->append(cstr, traits_type::length(cstr)));
         }
 
-        generic_unistring& append(size_type count, char_type ch)
+        generic_ustring& append(size_type count, char_type ch)
         {
-            // calls generic_unistring::append(const generic_unistring&)
-            return (this->append(generic_unistring{count, ch, this->get_allocator()}));
+            // calls generic_ustring::append(const generic_ustring&)
+            return (this->append(generic_ustring{count, ch, this->get_allocator()}));
         }
 
         template<typename inputIterT>
-        generic_unistring& append(inputIterT first, inputIterT last)
+        generic_ustring& append(inputIterT first, inputIterT last)
         {
-            // calls generic_unistring::insert(const_iterator, inputIterT, inputIterT)
+            // calls generic_ustring::insert(const_iterator, inputIterT, inputIterT)
             this->insert(this->cend(), first, last);
             return (*this);
         }
 
-        generic_unistring& append(std::initializer_list<char_type> init_list)
+        generic_ustring& append(std::initializer_list<char_type> init_list)
         {
-            // calls generic_unistring::append(inputIterT, inputIterT)
+            // calls generic_ustring::append(inputIterT, inputIterT)
             return (this->append(init_list.begin(), init_list.end()));
         }
 
         void push_back(char_type ch)
         {
             // Keep in mind the null character in _impl.
-            // calls generic_unistring::insert(const_iterator, char_type)
+            // calls generic_ustring::insert(const_iterator, char_type)
             this->insert(this->cend(), ch);
             return;
         }
 
         // UNISTRINGXX_UNISTRING_ERASE
 
-        generic_unistring& erase(size_type index = 0, size_type count = npos)
+        generic_ustring& erase(size_type index = 0, size_type count = npos)
         {
 #if (UNISTRINGXX_WITH_EXCEPTIONS)
             if (index > this->size())
@@ -616,14 +609,14 @@ namespace unistringxx
             const size_type erase_count = std::min(count, this->size() - index);
             const_iterator first = this->cbegin() + index;
             const_iterator last = first + erase_count;
-            // calls generic_unistring::erase(const_iterator, const_iterator)
+            // calls generic_ustring::erase(const_iterator, const_iterator)
             this->erase(first, last);
             return (*this);
         }
 
         iterator erase(const_iterator pos)
         {
-            // Technically, cend() cannot be used as pos, but generic_unistring's cend points to 
+            // Technically, cend() cannot be used as pos, but generic_ustring's cend points to 
             // the null character (which is a valid position for _impl).
             if (pos == this->cend())
                 return (this->end()); // return unchanged.
@@ -640,7 +633,7 @@ namespace unistringxx
         void pop_back(void)
         {
             if (!this->empty()) {
-                // calls generic_unistring::erase(size_type, size_type)
+                // calls generic_ustring::erase(size_type, size_type)
                 this->erase((this->size() - 1), 1); // Keep in mind the null character in _impl.
             }
             return;
@@ -648,9 +641,9 @@ namespace unistringxx
 
         // UNISTRINGXX_UNISTRING_REPLACE
 
-        generic_unistring& replace(
+        generic_ustring& replace(
             size_type index, size_type count,
-            const generic_unistring& str
+            const generic_ustring& str
         )
         {
 #if (UNISTRINGXX_WITH_EXCEPTIONS)
@@ -659,20 +652,20 @@ namespace unistringxx
 #endif // (UNISTRINGXX_WITH_EXCEPTIONS)
 
             const_iterator pos_at_index = this->cbegin() + index;
-            // calls generic_unistring:::replace(const_iterator, const_iterator, const generic_unistring&)
+            // calls generic_ustring:::replace(const_iterator, const_iterator, const generic_ustring&)
             return (this->replace(pos_at_index, pos_at_index + count, str));
         }
 
-        generic_unistring& replace(
+        generic_ustring& replace(
             size_type index, size_type count,
-            const generic_unistring& str, size_type str_index, size_type str_count = npos
+            const generic_ustring& str, size_type str_index, size_type str_count = npos
         )
         {
-            // calls generic_unistring:::replace(size_type, size_type, const generic_unistring&)
+            // calls generic_ustring:::replace(size_type, size_type, const generic_ustring&)
             return (this->replace(index, count, str.substr(str_index, str_count)));
         }
 
-        generic_unistring& replace(
+        generic_ustring& replace(
             size_type index, size_type count,
             const char_type* cstr, size_type cstr_count
         )
@@ -684,47 +677,47 @@ namespace unistringxx
                 UNISTRINGXX_THROW(std::length_error, "The result would have exceeded max_size().");
 #endif // (UNISTRINGXX_WITH_EXCEPTIONS)
 
-            // calls generic_unistring:::replace(size_type, size_type, const generic_unistring&)
-            return (this->replace(index, count, generic_unistring{cstr, cstr_count, this->get_allocator()}));
+            // calls generic_ustring:::replace(size_type, size_type, const generic_ustring&)
+            return (this->replace(index, count, generic_ustring{cstr, cstr_count, this->get_allocator()}));
         }
 
-        generic_unistring& replace(
+        generic_ustring& replace(
             size_type index, size_type count,
             const char_type* cstr
         )
         {
-            // calls generic_unistring:::replace(size_type, size_type, const char_type*, size_type)
+            // calls generic_ustring:::replace(size_type, size_type, const char_type*, size_type)
             return (this->replace(index, count, cstr, traits_type::length(cstr)));
         }
 
-        generic_unistring& replace(
+        generic_ustring& replace(
             size_type index, size_type count,
             size_type char_count, char_type ch
         )
         {
-            // calls generic_unistring:::replace(size_type, size_type, const generic_unistring&)
-            return (this->replace(index, count, generic_unistring{char_count, ch, this->get_allocator()}));
+            // calls generic_ustring:::replace(size_type, size_type, const generic_ustring&)
+            return (this->replace(index, count, generic_ustring{char_count, ch, this->get_allocator()}));
         }
 
-        generic_unistring& replace(
+        generic_ustring& replace(
             const_iterator first, const_iterator last,
-            const generic_unistring& str
+            const generic_ustring& str
         )
         {
-            // calls generic_unistring::replace(const_iterator, const_iterator, inputIterT, inputIterT)
+            // calls generic_ustring::replace(const_iterator, const_iterator, inputIterT, inputIterT)
             return (this->replace(first, last, str.cbegin(), str.cend()));
         }
 
-        generic_unistring& replace(
+        generic_ustring& replace(
             const_iterator first, const_iterator last,
             const char_type* cstr, size_type count
         )
         {
-            // calls generic_unistring:::replace(const_iterator, const_iterator, const generic_unistring&)
-            return (this->replace(first, last, generic_unistring{cstr, count, this->get_allocator()}));
+            // calls generic_ustring:::replace(const_iterator, const_iterator, const generic_ustring&)
+            return (this->replace(first, last, generic_ustring{cstr, count, this->get_allocator()}));
         }
 
-        generic_unistring& replace(
+        generic_ustring& replace(
             const_iterator first, const_iterator last,
             const char_type* cstr
         )
@@ -733,17 +726,17 @@ namespace unistringxx
             return (this->replace(first, last, cstr, traits_type::length(cstr)));
         }
 
-        generic_unistring& replace(
+        generic_ustring& replace(
             const_iterator first, const_iterator last,
             size_type count, char_type ch
         )
         {
-            // calls generic::unistring(const_iterator, const_iterator, const generic_unistring&)
-            return (this->replace(first, last, generic_unistring{count, ch, this->get_allocator()}));
+            // calls generic::unistring(const_iterator, const_iterator, const generic_ustring&)
+            return (this->replace(first, last, generic_ustring{count, ch, this->get_allocator()}));
         }
 
         template<typename inputIterT>
-        generic_unistring& replace(
+        generic_ustring& replace(
             const_iterator first, const_iterator last,
             inputIterT repl_first, inputIterT repl_last
         )
@@ -752,17 +745,17 @@ namespace unistringxx
             const_iterator actual_last = std::min(last, this->cend());
 
             // TODO: improve implementation without any construction and/or temporaries
-            generic_unistring result{this->cbegin(), actual_first, this->get_allocator()};
+            generic_ustring result{this->cbegin(), actual_first, this->get_allocator()};
             result.append(repl_first, repl_last).append(actual_last, this->cend());
             return ((*this) = std::move(result));
         }
 
-        generic_unistring& replace(
+        generic_ustring& replace(
             const_iterator first, const_iterator last,
             std::initializer_list<char_type> init_list
         )
         {
-            // calls generic_unistring::replace(const_iterator, const_iterator, inputIterT, inputIterT)
+            // calls generic_ustring::replace(const_iterator, const_iterator, inputIterT, inputIterT)
             return (this->replace(first, last, init_list.begin(), init_list.end()));
         }
 
@@ -782,13 +775,13 @@ namespace unistringxx
             return (num_copied);
         }
 
-        void swap(generic_unistring& other)
+        void swap(generic_ustring& other)
         {
             _impl.swap(other._impl);
             return;
         }
 
-        size_type find(const generic_unistring& str, size_type index = 0) const noexcept
+        size_type find(const generic_ustring& str, size_type index = 0) const noexcept
         {
             if (index > this->size())
                 return (npos);
@@ -818,23 +811,23 @@ namespace unistringxx
 
         size_type find(const char_type* cstr, size_type index, size_type count) const
         {
-            // calls generic_unistring::find(const generic_unistring&, size_type)
-            return (this->find(generic_unistring{cstr, count, this->get_allocator()}, index));
+            // calls generic_ustring::find(const generic_ustring&, size_type)
+            return (this->find(generic_ustring{cstr, count, this->get_allocator()}, index));
         }
 
         size_type find(const char_type* cstr, size_type index = 0) const /*noexcept*/
         {
-            // calls generic_unistring::find(const char_type*, size_type, size_type)
+            // calls generic_ustring::find(const char_type*, size_type, size_type)
             return (this->find(cstr, index, traits_type::length(cstr)));
         }
 
         size_type find(char_type ch, size_type index = 0) const /*noexcept*/
         {
-            // calls generic_unistring::find(const generic_unistring&, size_type)
-            return (this->find(generic_unistring{1, ch, this->get_allocator()}, index));
+            // calls generic_ustring::find(const generic_ustring&, size_type)
+            return (this->find(generic_ustring{1, ch, this->get_allocator()}, index));
         }
 
-        size_type rfind(const generic_unistring& str, size_type index = npos) const noexcept
+        size_type rfind(const generic_ustring& str, size_type index = npos) const noexcept
         {
             if (this->size() < str.size())
                 return (npos);
@@ -863,23 +856,23 @@ namespace unistringxx
 
         size_type rfind(const char_type* cstr, size_type index, size_type count) const
         {
-            // calls generic_unistring::rfind(const generic_unistring&, size_type)
-            return (this->rfind(generic_unistring{cstr, count, this->get_allocator()}, index));
+            // calls generic_ustring::rfind(const generic_ustring&, size_type)
+            return (this->rfind(generic_ustring{cstr, count, this->get_allocator()}, index));
         }
 
         size_type rfind(const char_type* cstr, size_type index = npos) const
         {
-            // calls generic_unistring::rfind(const char_type*, size_type, size_type)
+            // calls generic_ustring::rfind(const char_type*, size_type, size_type)
             return (this->rfind(cstr, index, traits_type::length(cstr)));
         }
 
         size_type rfind(char_type ch, size_type index = npos) const /*noexcept*/
         {
-            // calls generic_unistring::rfind(const generic_unistring&, size_type)
-            return (this->rfind(generic_unistring{1, ch, this->get_allocator()}, index));
+            // calls generic_ustring::rfind(const generic_ustring&, size_type)
+            return (this->rfind(generic_ustring{1, ch, this->get_allocator()}, index));
         }
 
-        size_type find_first_of(const generic_unistring& str, size_type index = 0) const noexcept
+        size_type find_first_of(const generic_ustring& str, size_type index = 0) const noexcept
         {
             if (index > this->size())
                 return (npos);
@@ -900,23 +893,23 @@ namespace unistringxx
 
         size_type find_first_of(const char_type* cstr, size_type index, size_type count) const
         {
-            // calls generic_unistring::find_first_of(const generic_unistring&, size_type)
-            return (this->find_first_of(generic_unistring{cstr, count, this->get_allocator()}, index));
+            // calls generic_ustring::find_first_of(const generic_ustring&, size_type)
+            return (this->find_first_of(generic_ustring{cstr, count, this->get_allocator()}, index));
         }
 
         size_type find_first_of(const char_type* cstr, size_type index = 0) const
         {
-            // calls generic_unistring::find_first_of(const char_type*, size_type, size_type)
+            // calls generic_ustring::find_first_of(const char_type*, size_type, size_type)
             return (this->find_first_of(cstr, index, traits_type::length(cstr)));
         }
 
         size_type find_first_of(char_type ch, size_type index = 0) const /*noexcept*/
         {
-            // calls generic_unistring::find_first_of(const generic_unistring&, size_type)
-            return (this->find_first_of(generic_unistring{1, ch, this->get_allocator()}, index));
+            // calls generic_ustring::find_first_of(const generic_ustring&, size_type)
+            return (this->find_first_of(generic_ustring{1, ch, this->get_allocator()}, index));
         }
 
-        size_type find_last_of(const generic_unistring& str, size_type index = npos) const noexcept
+        size_type find_last_of(const generic_ustring& str, size_type index = npos) const noexcept
         {
             const size_type start_index = std::min(index, this->size() - 1);
             for (size_type ctr = start_index; ctr >= 0; ctr--) {
@@ -935,23 +928,23 @@ namespace unistringxx
 
         size_type find_last_of(const char_type* cstr, size_type index, size_type count) const
         {
-            // calls generic_unistring::find_last_of(const generic_unistring&, size_type)
-            return (this->find_last_of(generic_unistring{cstr, count, this->get_allocator()}, index));
+            // calls generic_ustring::find_last_of(const generic_ustring&, size_type)
+            return (this->find_last_of(generic_ustring{cstr, count, this->get_allocator()}, index));
         }
 
         size_type find_last_of(const char_type* cstr, size_type index = npos) const
         {
-            // calls generic_unistring::find_last_of(const char_type*, size_type, size_type)
+            // calls generic_ustring::find_last_of(const char_type*, size_type, size_type)
             return (this->find_last_of(cstr, index, traits_type::length(cstr)));
         }
 
         size_type find_last_of(char_type ch, size_type index = npos) const /*noexcept*/
         {
-            // calls generic_unistring::find_last_of(const generic_unistring&, size_type)
-            return (this->find_last_of(generic_unistring{1, ch, this->get_allocator()}, index));
+            // calls generic_ustring::find_last_of(const generic_ustring&, size_type)
+            return (this->find_last_of(generic_ustring{1, ch, this->get_allocator()}, index));
         }
 
-        size_type find_first_not_of(const generic_unistring& str, size_type index = 0) const noexcept
+        size_type find_first_not_of(const generic_ustring& str, size_type index = 0) const noexcept
         {
             if (index > this->size())
                 return (npos);
@@ -972,23 +965,23 @@ namespace unistringxx
 
         size_type find_first_not_of(const char_type* cstr, size_type index, size_type count) const
         {
-            // calls generic_unistring::find_first_not_of(const generic_unistring&, size_type)
-            return (this->find_first_not_of(generic_unistring{cstr, count, this->get_allocator()}, index));
+            // calls generic_ustring::find_first_not_of(const generic_ustring&, size_type)
+            return (this->find_first_not_of(generic_ustring{cstr, count, this->get_allocator()}, index));
         }
 
         size_type find_first_not_of(const char_type* cstr, size_type index = 0) const
         {
-            // calls generic_unistring::find_first_not_of(const char_type*, size_type, size_type)
+            // calls generic_ustring::find_first_not_of(const char_type*, size_type, size_type)
             return (this->find_first_not_of(cstr, index, traits_type::length(cstr)));
         }
 
         size_type find_first_not_of(char_type ch, size_type index = 0) const /*noexcept*/
         {
-            // calls generic_unistring::find_first_not_of(const generic_unistring&, size_type)
-            return (this->find_first_not_of(generic_unistring{1, ch, this->get_allocator()}, index));
+            // calls generic_ustring::find_first_not_of(const generic_ustring&, size_type)
+            return (this->find_first_not_of(generic_ustring{1, ch, this->get_allocator()}, index));
         }
 
-        size_type find_last_not_of(const generic_unistring& str, size_type index = npos) const noexcept
+        size_type find_last_not_of(const generic_ustring& str, size_type index = npos) const noexcept
         {
             const size_type start_index = std::min(index, this->size() - 1);
             for (size_type ctr = start_index; ctr >= 0; ctr--) {
@@ -1007,20 +1000,20 @@ namespace unistringxx
 
         size_type find_last_not_of(const char_type* cstr, size_type index, size_type count) const
         {
-            // calls generic_unistring::find_last_not_of(const generic_unistring&, size_type)
-            return (this->find_last_not_of(generic_unistring{cstr, count, this->get_allocator()}, index));
+            // calls generic_ustring::find_last_not_of(const generic_ustring&, size_type)
+            return (this->find_last_not_of(generic_ustring{cstr, count, this->get_allocator()}, index));
         }
 
         size_type find_last_not_of(const char_type* cstr, size_type index = npos) const
         {
-            // calls generic_unistring::find_last_not_of(const char_type*, size_type, size_type)
+            // calls generic_ustring::find_last_not_of(const char_type*, size_type, size_type)
             return (this->find_last_not_of(cstr, index, traits_type::length(cstr)));
         }
 
         size_type find_last_not_of(char_type ch, size_type index = npos) const /*noexcept*/
         {
-            // calls generic_unistring::find_last_not_of(const generic_unistring&, size_type)
-            return (this->find_last_not_of(generic_unistring{1, ch, this->get_allocator()}, index));
+            // calls generic_ustring::find_last_not_of(const generic_ustring&, size_type)
+            return (this->find_last_not_of(generic_ustring{1, ch, this->get_allocator()}, index));
         }
 
         std::string to_u8string(size_type index = 0, size_type count = npos) const
@@ -1064,13 +1057,13 @@ namespace unistringxx
             );
         }
 
-        static generic_unistring from_u8string(
+        static generic_ustring from_u8string(
             const std::string& str,
             std::string::size_type index = 0, std::string::size_type count = std::string::npos
         )
         {
             const std::string actual_str = str.substr(index, count);
-            generic_unistring result;
+            generic_ustring result;
             for (std::string::size_type ctr = 0; ctr < actual_str.size(); ctr++) {
                 // determine how much octets needed to pass to from_utf8 function
                 const char8_t& ch = static_cast<char8_t>(actual_str[ctr]);
@@ -1097,13 +1090,13 @@ namespace unistringxx
             return (result);
         }
 
-        static generic_unistring from_u16string(
+        static generic_ustring from_u16string(
             const std::u16string& str,
             std::u16string::size_type index = 0, std::u16string::size_type count = std::u16string::npos
         )
         {
             const std::u16string actual_str = str.substr(index, count);
-            generic_unistring result;
+            generic_ustring result;
             for (std::u16string::size_type ctr = 0; ctr < actual_str.size(); ctr++) {
                 const auto& ch = actual_str[ctr];
                 if (ch >= 0xD800 && ch <= 0xDBFF) {
@@ -1118,13 +1111,13 @@ namespace unistringxx
             return (result);
         }
 
-        static generic_unistring from_u32string(
+        static generic_ustring from_u32string(
             const std::u32string& str,
             std::u32string::size_type index = 0, std::u32string::size_type count = std::u32string::npos
         )
         {
             const std::u32string actual_str = str.substr(index, count);
-            generic_unistring result;
+            generic_ustring result;
             for (const auto& ch : actual_str) {
                 result.push_back(char_type::from_utf32(ch));
             }
@@ -1133,25 +1126,25 @@ namespace unistringxx
 
         // Note: Because these are a template friend functions, the compiler will generate a free functions that
         // are specialized (i.e. these are not member functions).
-        friend bool operator==(const generic_unistring& left, const generic_unistring& right)
+        friend bool operator==(const generic_ustring& left, const generic_ustring& right)
         { return (left._impl == right._impl); }
 
-        friend bool operator!=(const generic_unistring& left, const generic_unistring& right)
+        friend bool operator!=(const generic_ustring& left, const generic_ustring& right)
         { return (left._impl != right._impl); }
 
-        friend bool operator<(const generic_unistring& left, const generic_unistring& right)
+        friend bool operator<(const generic_ustring& left, const generic_ustring& right)
         { return (left._impl < right._impl); }
 
-        friend bool operator<=(const generic_unistring& left, const generic_unistring& right)
+        friend bool operator<=(const generic_ustring& left, const generic_ustring& right)
         { return (left._impl <= right._impl); }
 
-        friend bool operator>(const generic_unistring& left, const generic_unistring& right)
+        friend bool operator>(const generic_ustring& left, const generic_ustring& right)
         { return (left._impl > right._impl); }
 
-        friend bool operator>=(const generic_unistring& left, const generic_unistring& right)
+        friend bool operator>=(const generic_ustring& left, const generic_ustring& right)
         { return (left._impl >= right._impl); }
 
-        friend bool operator==(const char_type* cstr, const generic_unistring& str)
+        friend bool operator==(const char_type* cstr, const generic_ustring& str)
         {
             if (str.size() == 0 && !cstr[0].is_null())
                 return (false);
@@ -1159,16 +1152,16 @@ namespace unistringxx
             return (traits_type::compare(cstr, str.c_str(), compare_count) == 0);
         }
 
-        friend bool operator==(const generic_unistring& str, const char_type* cstr)
+        friend bool operator==(const generic_ustring& str, const char_type* cstr)
         { return (cstr == str); }
 
-        friend bool operator!=(const char_type* cstr, const generic_unistring& str)
+        friend bool operator!=(const char_type* cstr, const generic_ustring& str)
         { return (!(cstr == str)); }
 
-        friend bool operator!=(const generic_unistring& str, const char_type* cstr)
+        friend bool operator!=(const generic_ustring& str, const char_type* cstr)
         { return (cstr != str); }
 
-        friend bool operator<(const char_type* cstr, const generic_unistring& str)
+        friend bool operator<(const char_type* cstr, const generic_ustring& str)
         {
             if (str.size() == 0 && !cstr[0].is_null())
                 return (false);
@@ -1176,10 +1169,10 @@ namespace unistringxx
             return (traits_type::compare(cstr, str.c_str(), compare_count) < 0);
         }
 
-        friend bool operator<(const generic_unistring& str, const char_type* cstr)
+        friend bool operator<(const generic_ustring& str, const char_type* cstr)
         { return (cstr > str); }
 
-        friend bool operator>(const char_type* cstr, const generic_unistring& str)
+        friend bool operator>(const char_type* cstr, const generic_ustring& str)
         {
             if (str.size() == 0 && !cstr[0].is_null())
                 return (true);
@@ -1187,19 +1180,19 @@ namespace unistringxx
             return (traits_type::compare(cstr, str.c_str(), compare_count) > 0);
         }
 
-        friend bool operator>(const generic_unistring& str, const char_type* cstr)
+        friend bool operator>(const generic_ustring& str, const char_type* cstr)
         { return (cstr < str); }
 
-        friend bool operator<=(const char_type* cstr, const generic_unistring& str)
+        friend bool operator<=(const char_type* cstr, const generic_ustring& str)
         { return (!(cstr > str)); }
 
-        friend bool operator<=(const generic_unistring& str, const char_type* cstr)
+        friend bool operator<=(const generic_ustring& str, const char_type* cstr)
         { return (!(str > cstr)); }
 
-        friend bool operator>=(const char_type* cstr, const generic_unistring& str)
+        friend bool operator>=(const char_type* cstr, const generic_ustring& str)
         { return (!(cstr < str)); }
 
-        friend bool operator>=(const generic_unistring& str, const char_type* cstr)
+        friend bool operator>=(const generic_ustring& str, const char_type* cstr)
         { return (!(str < cstr)); }
 
 #if (UNISTRINGXX_TEST)
@@ -1225,99 +1218,96 @@ namespace unistringxx
                 convert(result, uc);
             return (result);
         }
-    }; // class generic_unistring
+    }; // class generic_ustring
 
-    typedef generic_unistring<std::allocator<unichar_t_traits::char_type>> unistring;
+    typedef generic_ustring<std::allocator<uchar_t_traits::char_type>> ustring;
 
-    // Literal operators.
-    inline unistring operator "" UNISTRINGXX_UNISTRING_LITERALOP(const char* cstr, std::size_t size)
+    namespace operators
     {
-        return (unistring::from_u8string(std::string(cstr, size)));
-    }
+        // Literal operators.
+        inline ustring operator "" _us(const char* cstr, std::size_t size)
+        {
+            return (ustring::from_u8string(std::string(cstr, size)));
+        }
 
-    inline unistring operator "" UNISTRINGXX_UNISTRING_LITERALOP(const char16_t* cstr, std::size_t size)
-    {
-        return (unistring::from_u16string(std::u16string(cstr, size)));
-    }
+        inline ustring operator "" _us(const char16_t* cstr, std::size_t size)
+        {
+            return (ustring::from_u16string(std::u16string(cstr, size)));
+        }
 
-    inline unistring operator "" UNISTRINGXX_UNISTRING_LITERALOP(const char32_t* cstr, std::size_t size)
-    {
-        return (unistring::from_u32string(std::u32string(cstr, size)));
+        inline ustring operator "" _us(const char32_t* cstr, std::size_t size)
+        {
+            return (ustring::from_u32string(std::u32string(cstr, size)));
+        }
     }
-
-    // Helper for using literal operators.
-    #define UNISTRINGXX_UNISTRING_LITERAL(str) UNISTRINGXX_CONCAT(str, UNISTRINGXX_UNISTRING_LITERALOP)
-    // Shorthand for above
-    #define USXX_STR(str) UNISTRINGXX_UNISTRING_LITERAL(str)
 
     template<typename allocatorT>
-    inline int stoi(const generic_unistring<allocatorT>& str, std::size_t* index = nullptr, int base = 10)
+    inline int stoi(const generic_ustring<allocatorT>& str, std::size_t* index = nullptr, int base = 10)
     { return (std::stoi(str.to_u8string(), index, base)); }
 
     template<typename allocatorT>
-    inline long stol(const generic_unistring<allocatorT>& str, std::size_t* index = nullptr, int base = 10)
+    inline long stol(const generic_ustring<allocatorT>& str, std::size_t* index = nullptr, int base = 10)
     { return (std::stol(str.to_u8string(), index, base)); }
 
     template<typename allocatorT>
-    inline long long stoll(const generic_unistring<allocatorT>& str, std::size_t* index = nullptr, int base = 10)
+    inline long long stoll(const generic_ustring<allocatorT>& str, std::size_t* index = nullptr, int base = 10)
     { return (std::stoll(str.to_u8string(), index, base)); }
 
     template<typename allocatorT>
-    inline unsigned long stoul(const generic_unistring<allocatorT>& str, std::size_t* index = nullptr, int base = 10)
+    inline unsigned long stoul(const generic_ustring<allocatorT>& str, std::size_t* index = nullptr, int base = 10)
     { return (std::stoul(str.to_u8string(), index, base)); }
 
     template<typename allocatorT>
     inline unsigned long long stoull(
-        const generic_unistring<allocatorT>& str, std::size_t* index = nullptr, int base = 10
+        const generic_ustring<allocatorT>& str, std::size_t* index = nullptr, int base = 10
     )
     { return (std::stoull(str.to_u8string(), index, base)); }
 
     template<typename allocatorT>
-    inline float stof(const generic_unistring<allocatorT>& str, std::size_t* index = nullptr)
+    inline float stof(const generic_ustring<allocatorT>& str, std::size_t* index = nullptr)
     { return (std::stof(str.to_u8string(), index)); }
 
     template<typename allocatorT>
-    inline double stod(const generic_unistring<allocatorT>& str, std::size_t* index = nullptr)
+    inline double stod(const generic_ustring<allocatorT>& str, std::size_t* index = nullptr)
     { return (std::stod(str.to_u8string(), index)); }
 
     template<typename allocatorT>
-    inline long double stold(const generic_unistring<allocatorT>& str, std::size_t* index = nullptr)
+    inline long double stold(const generic_ustring<allocatorT>& str, std::size_t* index = nullptr)
     { return (std::stold(str.to_u8string(), index)); }
 
-    namespace
+    namespace // ImplementationDetail
     {
         template<typename T>
-        inline unistring to_unistring_internal(T value)
-        { return (unistring::from_u8string(std::to_string(value))); }
-    }
+        inline ustring to_ustring_internal(T value)
+        { return (ustring::from_u8string(std::to_string(value))); }
+    } // ImplementationDetail
 
-    inline unistring to_unistring(int value)
-    { return (to_unistring_internal(value)); }
+    inline ustring to_ustring(int value)
+    { return (to_ustring_internal(value)); }
 
-    inline unistring to_unistring(long value)
-    { return (to_unistring_internal(value)); }
+    inline ustring to_ustring(long value)
+    { return (to_ustring_internal(value)); }
 
-    inline unistring to_unistring(long long value)
-    { return (to_unistring_internal(value)); }
+    inline ustring to_ustring(long long value)
+    { return (to_ustring_internal(value)); }
 
-    inline unistring to_unistring(unsigned int value)
-    { return (to_unistring_internal(value)); }
+    inline ustring to_ustring(unsigned int value)
+    { return (to_ustring_internal(value)); }
 
-    inline unistring to_unistring(unsigned long value)
-    { return (to_unistring_internal(value)); }
+    inline ustring to_ustring(unsigned long value)
+    { return (to_ustring_internal(value)); }
 
-    inline unistring to_unistring(unsigned long long value)
-    { return (to_unistring_internal(value)); }
+    inline ustring to_ustring(unsigned long long value)
+    { return (to_ustring_internal(value)); }
 
-    inline unistring to_unistring(float value)
-    { return (to_unistring_internal(value)); }
+    inline ustring to_ustring(float value)
+    { return (to_ustring_internal(value)); }
 
-    inline unistring to_unistring(double value)
-    { return (to_unistring_internal(value)); }
+    inline ustring to_ustring(double value)
+    { return (to_ustring_internal(value)); }
 
-    inline unistring to_unistring(long double value)
-    { return (to_unistring_internal(value)); }
-
+    inline ustring to_ustring(long double value)
+    { return (to_ustring_internal(value)); }
 
 } // namespace unistringxx
 
@@ -1325,10 +1315,10 @@ namespace std
 {
     // specialization of std::hash
     template <>
-    struct hash<unistringxx::unistring>
+    struct hash<unistringxx::ustring>
     {
         typedef std::size_t result_type;
-        result_type operator()(const unistringxx::unistring& key) const
+        result_type operator()(const unistringxx::ustring& key) const
         {
             std::hash<std::string> hash_function;
             return (hash_function(key.to_u8string()));
@@ -1338,8 +1328,8 @@ namespace std
     // specialization of std::swap
     template<typename allocatorT>
     inline void swap(
-        unistringxx::generic_unistring<allocatorT>& left,
-        unistringxx::generic_unistring<allocatorT>& right
+        unistringxx::generic_ustring<allocatorT>& left,
+        unistringxx::generic_ustring<allocatorT>& right
     )
     {
         left.swap(right);

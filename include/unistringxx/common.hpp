@@ -53,20 +53,6 @@
 #else
     #undef UNISTRINGXX_TEST
     #define UNISTRINGXX_TEST 1
-    #undef UNISTRINGXX_UNICHAR_LITERALOP
-    #undef UNISTRINGXX_UNISTRING_LITERALOP
 #endif
-
-#if !defined(UNISTRINGXX_UNICHAR_LITERALOP)
-    #define UNISTRINGXX_UNICHAR_LITERALOP _uc
-#endif
-
-#if !defined(UNISTRINGXX_UNISTRING_LITERALOP)
-    #define UNISTRINGXX_UNISTRING_LITERALOP _us
-#endif
-
-// Preprocessor helpers used by literal operations
-#define UNISTRINGXX_PPCONCAT(A, B) A##B
-#define UNISTRINGXX_CONCAT(A, B) UNISTRINGXX_PPCONCAT(A, B)
 
 #endif // !defined(UNISTRINGXX_COMMON_HPP)

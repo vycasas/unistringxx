@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 project(unistringxx CXX)
 
-option(build_tests "Build testing suites." OFF)
+option(UNISTRINGXX_BUILD_LIBRARY "Build as a standalone library." OFF)
+option(UNISTRINGXX_BUILD_TESTS "Build testing suites." OFF)
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     set(CXX11_OPTION "-std=c++11 -pedantic -pedantic-errors -W -Wall -Wextra -Werror")
@@ -13,12 +14,19 @@ else ()
     message(FATAL_ERROR "Unsupported compiler: \"${CMAKE_CXX_COMPILER_ID}\"")
 endif ()
 
-
 include(CheckCXXCompilerFlag)
 check_cxx_compiler_flag(${CXX11_OPTION} HAVE_CXX11_SUPPORT)
 
 if (HAVE_CXX11_SUPPORT)
     set(CMAKE_CXX_FLAGS "${CXX11_OPTION} ${CMAKE_CXX_FLAGS}")
+endif ()
+
+if (UNISTRINGXX_BUILD_LIBRARY)
+    option(UNISTRINGXX_BUILD_SHARED "Build as a shared library." ON)
+    option(UNISTRINGXX_BUILD_STATIC "Build as a static library." ON)
+else ()
+    unset(UNISTRINGXX_BUILD_SHARED CACHE)
+    unset(UNISTRINGXX_BUILD_STATIC CACHE)
 endif ()
 
 include(version.txt)
@@ -38,13 +46,13 @@ set(
     UNISTRINGXX_HEADERS
     ${CMAKE_BINARY_DIR}/config.h
     ${CMAKE_SOURCE_DIR}/include/unistringxx/common.hpp
-    ${CMAKE_SOURCE_DIR}/include/unistringxx/unichar.hpp
-    ${CMAKE_SOURCE_DIR}/include/unistringxx/unicore.hpp
-    ${CMAKE_SOURCE_DIR}/include/unistringxx/unistring.hpp
+    ${CMAKE_SOURCE_DIR}/include/unistringxx/core.hpp
+    ${CMAKE_SOURCE_DIR}/include/unistringxx/uchar.hpp
+    ${CMAKE_SOURCE_DIR}/include/unistringxx/ustring.hpp
     ${CMAKE_SOURCE_DIR}/include/unistringxx/utils.hpp
 )
 
-if (build_tests)
+if (UNISTRINGXX_BUILD_TESTS)
     enable_testing()
 
     # Use Google test (https://code.google.com/p/googletest/)
@@ -78,24 +86,23 @@ if (build_tests)
     add_test(header_compile header_compile)
     set(CHECK_DEPS ${CHECK_DEPS} header_compile)
 
-    add_executable(unicore_test ${CMAKE_SOURCE_DIR}/test//unicore_test.cpp)
-    target_link_libraries(unicore_test ${GTEST_LIBS})
-    add_test(unicore_test unicore_test)
-    set(CHECK_DEPS ${CHECK_DEPS} unicore_test)
+    add_executable(core_test ${CMAKE_SOURCE_DIR}/test/core_test.cpp)
+    target_link_libraries(core_test ${GTEST_LIBS})
+    add_test(core_test core_test)
+    set(CHECK_DEPS ${CHECK_DEPS} core_test)
 
-    add_executable(unichar_test ${CMAKE_SOURCE_DIR}/test/unichar_test.cpp)
-    target_link_libraries(unichar_test ${GTEST_LIBS})
-    add_test(unichar_test unichar_test)
-    set(CHECK_DEPS ${CHECK_DEPS} unichar_test)
+    add_executable(uchar_test ${CMAKE_SOURCE_DIR}/test/uchar_test.cpp)
+    target_link_libraries(uchar_test ${GTEST_LIBS})
+    add_test(uchar_test uchar_test)
+    set(CHECK_DEPS ${CHECK_DEPS} uchar_test)
 
-    add_executable(unistring_test ${CMAKE_SOURCE_DIR}/test/unistring_test.cpp)
-    target_link_libraries(unistring_test ${GTEST_LIBS})
-    add_test(unistring_test unistring_test)
-    set(CHECK_DEPS ${CHECK_DEPS} unistring_test)
+    add_executable(ustring_test ${CMAKE_SOURCE_DIR}/test/ustring_test.cpp)
+    target_link_libraries(ustring_test ${GTEST_LIBS})
+    add_test(ustring_test ustring_test)
+    set(CHECK_DEPS ${CHECK_DEPS} ustring_test)
 
     add_custom_target(test_verbose COMMAND ${CMAKE_CTEST_COMMAND} -V DEPENDS ${CHECK_DEPS})
     add_custom_target(check DEPENDS test_verbose)
-
 endif ()
 
 set(

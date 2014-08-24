@@ -1,5 +1,5 @@
-#if !defined(UNISTRINGXX_UNICORE_HPP)
-#define UNISTRINGXX_UNICORE_HPP
+#if !defined(UNISTRINGXX_CORE_HPP)
+#define UNISTRINGXX_CORE_HPP
 
 #include <algorithm>
 #include <cinttypes>
@@ -112,12 +112,12 @@ namespace unistringxx
     ///
     /// Non-standard 24-bit data type.
     ///
-    struct uint24_t
+    struct uint24
     {
         ///
         /// Creates a 24-bit data with a default value.
         ///
-        uint24_t(void)
+        uint24(void)
         {
             std::fill_n(std::begin(data), 3, 0x00);
         }
@@ -126,7 +126,7 @@ namespace unistringxx
         /// Creates a 24-bit data with a provided value.
         /// @param value The value to initialize the 24-bit data to.
         ///
-        uint24_t(std::int_least32_t value)
+        uint24(std::int_least32_t value)
         {
             auto valueItr = reinterpret_cast<std::uint8_t*>(&value);
 
@@ -159,7 +159,12 @@ namespace unistringxx
         // implementation, thus at minimum, memory used by std::bitset<24> is >= (24 + (sizeof (void*) * 8))
         std::uint8_t data[3];
         /// @endinternal
-    }; // struct uint24_t
+    }; // struct uint24
+
+    ///
+    /// Type definition for uint24_t.
+    ///
+    typedef uint24 uint24_t;
 
     ///
     /// Adds and assigns the sum.
@@ -332,26 +337,21 @@ namespace unistringxx
     }
 
     ///
-    /// Literal operator for creating uint24_t type.
-    /// @param value The value of the literal.
-    /// @returns A uint24_t type based on the literal value.
+    /// Literal operators provided by unistringxx.
     ///
-    inline uint24_t operator "" _u24(unsigned long long int value)
+    namespace operators
     {
-        return (uint24_t(static_cast<std::int_least32_t>(value)));
+        ///
+        /// Literal operator for creating uint24_t type.
+        /// @param value The value of the literal.
+        /// @returns A uint24_t type based on the literal value.
+        ///
+        inline uint24_t operator "" _u24(unsigned long long int value)
+        {
+            return (uint24_t(static_cast<std::int_least32_t>(value)));
+        }
     }
 
-    ///
-    /// Literal operator for creating uint24_t type.
-    /// @param value The value of the literal.
-    /// @returns A uint24_t type based on the literal value.
-    ///
-    inline uint24_t operator "" _U24(unsigned long long int value)
-    {
-        return (uint24_t(static_cast<std::int_least32_t>(value)));
-    }
-
-    // uint24_t operators
 } // namespace unistringxx
 
-#endif // !defined(UNISTRINGXX_UNICORE_HPP)
+#endif // !defined(UNISTRINGXX_CORE_HPP)
