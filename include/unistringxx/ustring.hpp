@@ -1239,7 +1239,7 @@ namespace unistringxx
         {
             return (ustring::from_u32string(std::u32string(cstr, size)));
         }
-    }
+    } // namespace operators
 
     template<typename allocatorT>
     inline int stoi(const generic_ustring<allocatorT>& str, std::size_t* index = nullptr, int base = 10)

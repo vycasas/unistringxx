@@ -351,7 +351,7 @@ namespace unistringxx
         {
             return (uchar_t::from_utf32(ch32));
         }
-    }
+    } // namespace operators
 
     struct uchar_traits
     {

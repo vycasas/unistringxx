@@ -350,7 +350,7 @@ namespace unistringxx
         {
             return (uint24_t(static_cast<std::int_least32_t>(value)));
         }
-    }
+    } // namespace operators
 
 } // namespace unistringxx
 

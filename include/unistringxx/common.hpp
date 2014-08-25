@@ -48,6 +48,14 @@
     #define UNISTRINGXX_MAY_THROW_EXCEPTIONS
 #endif
 
+#if !defined(UNISTRINGXX_BUILD_LIBRARY)
+    #define UNISTRINGXX_BUILD_LIBRARY 0
+    #define UNISTRINGXX_INLINE inline
+#else
+    #define UNISTRINGXX_BUILD_LIBRARY 1
+    #define UNISTRINGXX_INLINE
+#endif
+
 #if !defined(UNISTRINGXX_TEST)
     #define UNISTRINGXX_TEST 0
 #else
