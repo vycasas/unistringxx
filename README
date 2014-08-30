@@ -1,0 +1,32 @@
+About:
+This project is based on the UniCString project(https://github.com/vycasas/unicstring). The "unistringxx" project is a
+C++11 or later Unicode strings library which mimics the standard strings library's interface (unlike UniCString). Tests
+are written using Google Test (https://code.google.com/p/googletest/).
+
+Building:
+This project requires CMake. The following describes the simplest way of building the project:
+
+1. Create an out-of-source build directory:
+    > mkdir build
+
+2. Go into the build directory and invoke CMake while telling it where the root source directory is.
+    > cd build
+    > cmake /path/to/unistringxx/root/source/directory
+
+3. Run make and make install
+    > make
+    > sudo make install
+
+4. If you wish to run the tests, the Google Test framework is required. If the source is ready, it is possible to pass
+    the option GTEST_SRC_DIR to CMake to allow the project to build and link with Google Test. To run the tests, simply
+    issue:
+
+    > make check
+
+You can configure the build parameters by passing options or other arguments to CMake. Additionally, you can also use
+the curses version of CMake (ccmake) or the Qt-based GUI (cmake-gui).
+
+Please see: http://www.cmake.org/ for more information.
+
+License:
+The files in this project are licensed under "The MIT License". Please see the file LICENSE for more information.
